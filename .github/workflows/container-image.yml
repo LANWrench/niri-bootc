@@ -12,7 +12,7 @@ env:
   IMAGE_REPO: ghcr.io/lanwrench
   IMAGE_TAG: latest
   VERSION: 42
-  VARIANT: 42
+  VARIANT: container
 
 jobs:
   io-image:

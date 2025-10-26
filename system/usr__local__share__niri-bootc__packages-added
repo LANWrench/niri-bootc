@@ -6,7 +6,16 @@
 # libreoffice
 # libreoffice-help-en
 
+# Window manager
+niri
+# Display Manager
+gdm
+
+# Networking
+wpa_supplicant
+
 # Utilities
+kitty
 vim-default-editor
 neovim
 distrobox
@@ -43,7 +52,3 @@ splix
 # System
 # kamera
 lm_sensors
-
-# Display Manager
-gdm
-
