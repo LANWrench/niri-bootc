@@ -15,10 +15,10 @@ vifm
 python3-pip
 
 # Cockpit
-cockpit
-cockpit-podman
-cockpit-selinux
-cockpit-machines
+# cockpit
+# cockpit-podman
+# cockpit-selinux
+# cockpit-machines
 
 # Virtualisation
 qemu-kvm

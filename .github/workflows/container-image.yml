@@ -8,7 +8,7 @@ on:
 
 env:
   ARCH: x86_64
-  IMAGE_NAME: bootc-niri
+  IMAGE_NAME: niri-bootc
   IMAGE_REPO: ghcr.io/lanwrench
   IMAGE_TAG: latest
   VERSION: 42
