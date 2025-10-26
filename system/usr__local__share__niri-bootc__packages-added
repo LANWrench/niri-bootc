@@ -44,3 +44,6 @@ splix
 # kamera
 lm_sensors
 
+# Display Manager
+gdm
+
