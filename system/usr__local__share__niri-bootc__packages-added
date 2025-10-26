@@ -24,9 +24,6 @@ libvirt
 virt-install
 virt-viewer
 
-# Tailscale network
-tailscale
-
 # Troubleshooting
 lshw
 htop

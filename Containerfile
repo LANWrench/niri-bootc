@@ -1,31 +1,29 @@
 FROM quay.io/fedora/fedora-bootc:42
-MAINTAINER First Last
 
 # SETUP FILESYSTEM
 RUN rmdir /opt && ln -s -T /var/opt /opt
 RUN mkdir /var/roothome
 
 # PREPARE PACKAGES
-COPY --chmod=0644 ./system/usr__local__share__kde-bootc__packages-removed /usr/local/share/kde-bootc/packages-removed
-COPY --chmod=0644 ./system/usr__local__share__kde-bootc__packages-added /usr/local/share/kde-bootc/packages-added
-RUN jq -r .packages[] /usr/share/rpm-ostree/treefile.json > /usr/local/share/kde-bootc/packages-fedora-bootc
+COPY --chmod=0644 ./system/usr__local__share__niri-bootc__packages-removed /usr/local/share/niri-bootc/packages-removed
+COPY --chmod=0644 ./system/usr__local__share__niri-bootc__packages-added /usr/local/share/niri-bootc/packages-added
+RUN jq -r .packages[] /usr/share/rpm-ostree/treefile.json > /usr/local/share/niri-bootc/packages-fedora-bootc
 
 # INSTALL REPOS
 RUN dnf -y install dnf5-plugins
-RUN dnf config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo 
+RUN dnf copr enable -y yalter/niri
 
 # INSTALL PACKAGES
-RUN dnf -y install @kde-desktop-environment
-RUN grep -vE '^#' /usr/local/share/kde-bootc/packages-added | xargs dnf -y install --allowerasing
+RUN grep -vE '^#' /usr/local/share/niri-bootc/packages-added | xargs dnf -y install --allowerasing
 
 # REMOVE PACKAGES
-RUN grep -vE '^#' /usr/local/share/kde-bootc/packages-removed | xargs dnf -y remove
+RUN grep -vE '^#' /usr/local/share/niri-bootc/packages-removed | xargs dnf -y remove
 RUN dnf -y autoremove
 RUN dnf clean all
 
 # CONFIGURATION
 COPY --chmod=0755 ./system/usr__local__bin/* /usr/local/bin/
-COPY --chmod=0644 ./system/etc__skel__kde-bootc /etc/skel/.bashrc.d/kde-bootc
+COPY --chmod=0644 ./system/etc__skel__niri-bootc /etc/skel/.bashrc.d/niri-bootc
 COPY --chmod=0600 ./system/usr__lib__ostree__auth.json /usr/lib/ostree/auth.json
 
 # USERS
