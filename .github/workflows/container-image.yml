@@ -14,7 +14,5 @@ jobs:
     - uses: actions/checkout@v4
     - name: run podman build
       run: podman build -t niri-bootc --disable-compression=false .
-    - name: tag image for ghcr.io
-      run: podman tag niri-bootc ghcr.io/LANWrench/niri-bootc:latest
     - name: push image to ghcr.io
-      run: podman push --creds=${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} ghcr.io/LANWrench/niri-bootc:latest
+      run: podman push --creds=${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} niri-bootc ghcr.io/lanwrench/niri-bootc:latest
