@@ -3,11 +3,13 @@
 ####################################################
 
 # LibreOffice
-libreoffice
-libreoffice-help-en
+# libreoffice
+# libreoffice-help-en
 
 # Utilities
 vim-default-editor
+neovim
+distrobox
 git
 vifm
 python3-pip
