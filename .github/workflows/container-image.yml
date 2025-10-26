@@ -11,7 +11,7 @@ env:
   IMAGE_NAME: bootc-niri
   IMAGE_REPO: ghcr.io/lanwrench
   IMAGE_TAG: latest
-  VERSION: 1.0
+  VERSION: 42
   VARIANT: 42
 
 jobs:
