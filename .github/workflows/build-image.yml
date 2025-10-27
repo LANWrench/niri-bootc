@@ -1,0 +1,72 @@
+name: build container -> niri-bootc
+run-name: building container -> niri-bootc
+on: 
+  workflow_dispatch:
+  push:
+  schedule:
+  - cron: '30 13 * * FRI'    # Triggers Fri at 13:30
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run podman build
+      run: sudo podman build -t niri-bootc --disable-compression=false .
+    
+    - name: Login to GitHub Container Registry
+      run: echo ${{ secrets.GITHUB_TOKEN }} | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
+    
+    - name: Push image to ghcr.io
+      run: sudo podman push niri-bootc ghcr.io/lanwrench/niri-bootc:latest
+
+  build-iso:
+    runs-on: ubuntu-latest
+    needs: build-image
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Login to GitHub Container Registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
+      
+      - name: Pull image from ghcr.io
+        run: |
+          sudo podman pull ghcr.io/lanwrench/niri-bootc:latest
+      
+      - name: Generate bootable ISO
+        run: |
+          mkdir -p output
+          
+          sudo podman run --rm --privileged \
+            --pull=newer \
+            --security-opt label=type:unconfined_t \
+            -v /var/lib/containers/storage:/var/lib/containers/storage \
+            -v $(pwd)/output:/output \
+            quay.io/centos-bootc/bootc-image-builder:latest \
+            ghcr.io/lanwrench/niri-bootc:latest \
+            --type iso \
+            --rootfs ext4
+      
+      - name: Check ISO was created
+        run: |
+          if [ ! -f output/*/*.iso ]; then
+            echo "Error: No ISO file generated"
+            exit 1
+          fi
+      
+      - name: List output
+        run: |
+          find output -type f
+          ls -lh output/
+      
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootable-iso
+          path: output/**/*.iso
+          retention-days: 30
+          compression-level: 0
