@@ -6,14 +6,14 @@ on:
   schedule:
   - cron: '30 13 * * FRI'    # Triggers Fri at 13:30
 
-env:
-  ARCH: x86_64
-  IMAGE_NAME: niri-bootc
-  IMAGE_REPO: ghcr.io/lanwrench
-  IMAGE_TAG: latest
-  IMAGE_SIGNED: false
-  VERSION: 42
-  VARIANT: container
+# env:
+#   ARCH: x86_64
+#   IMAGE_NAME: niri-bootc
+#   IMAGE_REPO: ghcr.io/lanwrench
+#   IMAGE_TAG: latest
+#   IMAGE_SIGNED: false
+#   VERSION: 42
+#   VARIANT: container
 
 jobs:
   io-image:
@@ -28,28 +28,45 @@ jobs:
     - name: push image to ghcr.io
       run: podman push --creds=${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} niri-bootc ghcr.io/lanwrench/niri-bootc:latest
 
-    - name: Build ISO
-      uses: jasonn3/build-container-installer@main
-      id: build
-      with:
-        arch: ${{ env.ARCH}}
-        image_name: ${{ env.IMAGE_NAME}}
-        image_repo: ${{ env.IMAGE_REPO}}
-        image_tag: ${{ env.IMAGE_TAG }}
-        version: ${{ env.VERSION }}
-        variant: ${{ env.VARIANT }}
-        iso_name: ${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG }}-${{ env.VERSION }}.iso
-        image_signed: ${{ env.IMAGE_SIGNED }}
+  build-iso:
+    runs-on: ubuntu-latest    
+    steps:
+      - uses: actions/checkout@v4
+      # - name: Free disk space
+      #   run: |
+      #     sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost
+      #     sudo df -h
 
-    # This example is for uploading your ISO as a Github artifact. You can do something similar using any cloud storage, so long as you copy the output
-    - name: Upload ISO as artifact
-      id: upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ steps.build.outputs.iso_name }}
-        path: |
-          ${{ steps.build.outputs.iso_path }}/${{ steps.build.outputs.iso_name }}
-          ${{ steps.build.outputs.iso_path }}/${{ steps.build.outputs.iso_name }}-CHECKSUM
-        if-no-files-found: error
-        retention-days: 0
-        compression-level: 0
+      # - name: Install podman
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y podman
+
+      - name: Build bootc container image
+        run: |
+          podman build -t localhost/niri-bootc:latest .
+
+      - name: Generate bootable ISO
+        run: |
+          mkdir -p output
+          
+          sudo podman run --rm --privileged \
+            --pull=newer \
+            --security-opt label=type:unconfined_t \
+            -v /var/lib/containers/storage:/var/lib/containers/storage \
+            -v $(pwd)/output:/output \
+            quay.io/centos-bootc/bootc-image-builder:latest \
+            localhost/niri-bootc:latest \
+            --type iso \
+            --local
+
+      - name: List output
+        run: |
+          find output -type f
+          ls -lh output/
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootable-iso
+          path: output/**/*.iso
