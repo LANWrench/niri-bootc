@@ -1,7 +1,7 @@
 name: build iso -> niri-bootc
 run-name: building iso -> niri-bootc
-# on: 
-#   workflow_dispatch:
+on: 
+  workflow_dispatch:
 #   push:
 #   schedule:
 #   - cron: '30 13 * * FRI'    # Triggers Fri at 13:30
