@@ -8,11 +8,9 @@
 
 # Window manager
 niri
+
 # Display Manager
 gdm
-
-# Networking
-wpa_supplicant
 
 # Utilities
 kitty
@@ -22,6 +20,7 @@ distrobox
 git
 vifm
 python3-pip
+tmux
 
 # Cockpit
 # cockpit

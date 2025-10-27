@@ -6,15 +6,6 @@ on:
   schedule:
   - cron: '30 13 * * FRI'    # Triggers Fri at 13:30
 
-# env:
-#   ARCH: x86_64
-#   IMAGE_NAME: niri-bootc
-#   IMAGE_REPO: ghcr.io/lanwrench
-#   IMAGE_TAG: latest
-#   IMAGE_SIGNED: false
-#   VERSION: 42
-#   VARIANT: container
-
 jobs:
   io-image:
     runs-on: ubuntu-latest
@@ -23,29 +14,29 @@ jobs:
       packages: write
     steps:
     - uses: actions/checkout@v4
-    - name: run podman build
-      run: podman build -t niri-bootc --disable-compression=false .
-    - name: push image to ghcr.io
-      run: podman push --creds=${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} niri-bootc ghcr.io/lanwrench/niri-bootc:latest
+    
+    - name: Run podman build
+      run: sudo podman build -t niri-bootc --disable-compression=false .
+    
+    - name: Login to GitHub Container Registry
+      run: echo ${{ secrets.GITHUB_TOKEN }} | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
+    
+    - name: Push image to ghcr.io
+      run: sudo podman push niri-bootc ghcr.io/lanwrench/niri-bootc:latest
 
   build-iso:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
+    needs: io-image
     steps:
       - uses: actions/checkout@v4
-      # - name: Free disk space
-      #   run: |
-      #     sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost
-      #     sudo df -h
-
-      # - name: Install podman
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y podman
-
-      - name: Build bootc container image
+      
+      - name: Login to GitHub Container Registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
+      
+      - name: Pull image from ghcr.io
         run: |
-          podman build -t localhost/niri-bootc:latest .
-
+          sudo podman pull ghcr.io/lanwrench/niri-bootc:latest
+      
       - name: Generate bootable ISO
         run: |
           mkdir -p output
@@ -56,17 +47,25 @@ jobs:
             -v /var/lib/containers/storage:/var/lib/containers/storage \
             -v $(pwd)/output:/output \
             quay.io/centos-bootc/bootc-image-builder:latest \
-            localhost/niri-bootc:latest \
-            --type iso \
-            --local
-
+            ghcr.io/lanwrench/niri-bootc:latest \
+            --type iso
+      
+      - name: Check ISO was created
+        run: |
+          if [ ! -f output/*/*.iso ]; then
+            echo "Error: No ISO file generated"
+            exit 1
+          fi
+      
       - name: List output
         run: |
           find output -type f
           ls -lh output/
-
+      
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
           name: bootable-iso
           path: output/**/*.iso
+          retention-days: 30
+          compression-level: 0
