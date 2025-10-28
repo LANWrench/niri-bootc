@@ -14,7 +14,7 @@ RUN dnf -y install dnf5-plugins
 RUN dnf copr enable -y yalter/niri
 
 # INSTALL PACKAGES
-RUN dnf -y install niri
+# RUN dnf -y install niri
 RUN grep -vE '^#' /usr/local/share/niri-bootc/packages-added | xargs dnf -y install --allowerasing
 
 # REMOVE PACKAGES
