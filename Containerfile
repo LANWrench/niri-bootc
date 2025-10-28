@@ -41,7 +41,6 @@ COPY --chmod=0644 ./systemd/usr__lib__systemd__system__bootc-fetch.timer /usr/li
 
 RUN systemctl enable firstboot-setup.service
 RUN systemctl enable bootloader-update.service
-# RUN systemctl enable gdm.service
 RUN systemctl mask bootc-fetch-apply-updates.timer
 
 # CLEAN & CHECK
