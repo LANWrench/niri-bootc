@@ -14,6 +14,7 @@ RUN dnf -y install dnf5-plugins
 RUN dnf copr enable -y yalter/niri
 
 # INSTALL PACKAGES
+RUN dnf -y install niri
 RUN grep -vE '^#' /usr/local/share/niri-bootc/packages-added | xargs dnf -y install --allowerasing
 
 # REMOVE PACKAGES
@@ -40,7 +41,7 @@ COPY --chmod=0644 ./systemd/usr__lib__systemd__system__bootc-fetch.timer /usr/li
 
 RUN systemctl enable firstboot-setup.service
 RUN systemctl enable bootloader-update.service
-RUN systemctl enable gdm.service
+# RUN systemctl enable gdm.service
 RUN systemctl mask bootc-fetch-apply-updates.timer
 
 # CLEAN & CHECK

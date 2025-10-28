@@ -28,7 +28,9 @@ jobs:
             --security-opt label=type:unconfined_t \
             -v /var/lib/containers/storage:/var/lib/containers/storage \
             -v $(pwd)/output:/output \
+            -v $(pwd)/bootc-config.toml:/config.toml:ro \
             quay.io/centos-bootc/bootc-image-builder:latest \
+            --config /config.toml \
             ghcr.io/lanwrench/niri-bootc:latest \
             --type iso \
             --rootfs ext4
