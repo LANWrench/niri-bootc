@@ -10,8 +10,8 @@ COPY --chmod=0644 ./system/usr__local__share__niri-bootc__packages-added /usr/lo
 RUN jq -r .packages[] /usr/share/rpm-ostree/treefile.json > /usr/local/share/niri-bootc/packages-fedora-bootc
 
 # INSTALL REPOS
-#RUN dnf -y install dnf5-plugins
-#RUN dnf copr enable -y yalter/niri
+RUN dnf -y install dnf5-plugins
+RUN dnf copr enable -y yalter/niri
 
 # INSTALL PACKAGES
 # RUN dnf -y install niri
